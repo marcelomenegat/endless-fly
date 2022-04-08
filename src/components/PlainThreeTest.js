@@ -2,26 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js'
 import '../App.css';
-// https://tympanus.net/codrops/2016/04/26/the-aviator-animating-basic-3d-scene-threejs/
-// https://github.com/yakudoo/TheAviator
-// https://codesandbox.io/s/modest-dijkstra-upurqm?file=/js/main_step1.js:6242-6338
-// https://jasonweaver.name/three-js-and-react-with-react-three-fiber/
-/** Sea = () => {
-    var geom = new THREE.CylinderGeometry(600, 600, 800, 40, 10);
-    geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
-    var mat = new THREE.MeshPhongMaterial({
-      color: Colors.blue,
-      transparent: true,
-      opacity: 0.6,
-      shading: THREE.FlatShading
-    });
-    //this.mesh = new THREE.Mesh(geom, mat);
-    ///this.mesh.receiveShadow = true;
-  };
-  */
+import Stats from 'stats.js'
 
-  // import * as dat from "https://cdn.skypack.dev/dat.gui"
-  
+const stats = new Stats();
+stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild( stats.dom );
 
 const Colors = {
   red: 0xf25346,
@@ -117,34 +102,12 @@ const PlainThreeTest = () => {
   const [isAnimating, setAnimating] = useState(true);
   const controls = useRef(null);
 
-  // const gui = new dat.GUI()
-  // const world = {
-  //   camera: {
-  //     positionX: 0,
-  //     positionY: 600,
-  //     positionZ: 550
-  //   }
-  // }
-  // gui.add(world.camera, 'positionX', 1, 1500).onChange(createCamera)
-  // gui.add(world.camera, 'positionY', 1, 5000).onChange(createCamera)
-  // gui.add(world.camera, 'positionZ', 1, 1000).onChange(createCamera)
 
-  // const createCamera = () => {
-  //   camera = new THREE.PerspectiveCamera(
-  //     fieldOfView,
-  //     aspectRatio,
-  //     nearPlane,
-  //     farPlane
-  //   );  
-  //   camera.position.x = world.camera.positionX;
-  //   camera.position.z = world.camera.positionZ;
-  //   camera.position.y = world.camera.positionY;
-  // }
 
   const createScene = () => {
     scene = new THREE.Scene();
     aspectRatio = WIDTH / HEIGHT;
-    // console.log(`${HEIGHT} / ${WIDTH}`);
+
     fieldOfView = 60;
     nearPlane = 1;
     farPlane = 10000;
@@ -166,12 +129,6 @@ const PlainThreeTest = () => {
     renderer.shadowMap.enabled = true;
     canvasRef.current.appendChild(renderer.domElement);
 
-    // new OrbitControls(camera, renderer.domElement)
-    // camera.position.z = 150    
-
-    // createPlanet()
-
-
     const renderScene = () => {
       renderer.render(scene, camera);
     };
@@ -184,10 +141,14 @@ const PlainThreeTest = () => {
       camera.updateProjectionMatrix();
       renderScene();
     };
+    
+    const animate = function () {
 
-    var animate = function () {
-      planet.mesh.rotation.z += 0.002;
+      stats.begin();
+      planet.mesh.rotation.z += 0.003;
+      sky.mesh.rotation.z += .003;
       renderScene();
+      stats.end();
       window.requestAnimationFrame(animate);
     };
 
@@ -235,15 +196,19 @@ const PlainThreeTest = () => {
 
   const createSky = () => {
     sky = new Sky();
-    sky.mesh.position.y = -600;
+    sky.mesh.position.y = -200;
     scene.add(sky.mesh);
   }
+
+ 
 
   useEffect(() => {
     createScene();
     createLights();
     createPlanet()
     createSky()
+
+    // loop()
 
     return () => {
       controls.current.stop();
